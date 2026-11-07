@@ -557,6 +557,12 @@ examples/minimal/     **一条命令证明它能跑**：建两个临时目录当
                      `python examples\minimal\setup.py` → PASS 4/4
 ```
 
+> ⚠️ **`install/install.ps1` 在 git 里存的是 LF、检出后变 CRLF**（`.gitattributes` 写了
+> `*.ps1 text eol=crlf`），并且带 UTF-8 BOM —— 前者是给 Windows PowerShell 5.1 用的，
+> BOM 是因为 5.1 没有 BOM 就按 GBK 解、中文注释会把脚本顶坏。
+> **拿它跟别人 diff 时看到整文件一片红，那不是改动，是换行符。**
+> 同理 `.py` / `.md` 一律 LF，别在 Windows 上顺手 CRLF 化再去提交。
+
 ---
 
 ## 推仓前必做（脱敏）
