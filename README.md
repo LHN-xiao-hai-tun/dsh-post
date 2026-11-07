@@ -655,6 +655,41 @@ examples/minimal/     **一条命令证明它能跑**：建两个临时目录当
 
 ---
 
+## 手机 / 平板上的聊天室面板（可选）
+
+`panels/chatroom/` 是给 **dsh-go App** 的原生面板插件（v0.2.2）：能看聊天室最近 24 条，
+也能在 App 里直接发一句。它和本仓的命令行工具**共用同一个 hub.jsonl** ——
+面板读的、写的都是那一份文件，不另建数据；它**不会替你改任何设备设置**，只显示和发送。
+
+```sh
+# 1) 放进 dsh-go 的插件目录（装的是链接，装完别删这个目录）
+P="${DSH_HOME:-$HOME/.dsh}/dsh-go/plugins/local-chatroom"
+mkdir -p "$(dirname "$P")" && cp -r panels/chatroom "$P"
+
+# 2) 装进 profile（dsh-go 原生插件走 web profile）
+dsh plugin --profile web add "$P"
+```
+
+改过 `lib/` 里的代码要在 App 的「引擎」页**重启引擎**；只改 `package.json` 会自动重读。
+profile 的 `package.json` 里用 `link:` 指向同一目录也等价 —— 但本仓只实测过上面这条
+`dsh plugin add`，`link:` 那条是通用 npm 依赖写法，没有在插件加载器上验证过。
+
+配置写在组合里该插件那一行的 `config:` 段（环境变量优先）：
+
+| 字段 | 环境变量 | 默认 | 说明 |
+|---|---|---|---|
+| `hub` | `DSH_CHATROOM_HUB` | 空，**必须配** | 电脑上 hub.jsonl 的路径（面板 `ssh` 过去 `cat`）。没配时面板直说「未配置」，⛔ 不会假装没有消息。 |
+| `speaker` | `DSH_CHATROOM_SPEAKER` | `me` | 面板/胶囊发出去的消息记在这个名下。⛔ 不回退成设备名。 |
+| `deviceNames` | —（只走 config） | `{}` → 显示设备名本身 | 设备名 → 显示名的映射，例如 `{ "phone": "手机" }`。 |
+| `workspace` | `DSH_CHATROOM_WORKSPACE` | 进程当前目录 | 本机工作区：`工具/聊天室.py` 与 `.dsh/state/我是谁.json` 都在下面。 |
+| `sshAliases` | `DSH_CHATROOM_SSH`（逗号分隔） | `["pc"]` | 电脑的 ssh 别名；多个**并发**试，第一个拿到的赢。 |
+
+前置条件：面板那台机器能**免密** ssh 到电脑；`<workspace>/工具/聊天室.py` 存在且支持
+`--say-file` / `--from`（本仓 `python -m bridge.chat` 是同一套写 hub 的规矩）。
+细节、`config:` 例子、测试跑法见 [`panels/chatroom/README.md`](panels/chatroom/README.md)。
+
+---
+
 ## 推仓前必做（脱敏）
 
 用任何 secret scanner（gitleaks / trufflehog）都行，但要按你**自己的**禁词表配：

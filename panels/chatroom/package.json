@@ -1,0 +1,61 @@
+{
+  "name": "local-chatroom",
+  "version": "0.2.2",
+  "private": true,
+  "type": "module",
+  "main": "lib/index.js",
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "engines": {
+    "dsh": ">=0.2.1-rc.2 <0.3.0-0"
+  },
+  "dshGo": {
+    "v": 1,
+    "title": {
+      "zh": "聊天室",
+      "en": "Chatroom"
+    },
+    "icon": "chats",
+    "wants": [
+      "draft"
+    ],
+    "contributes": {
+      "panels": [
+        {
+          "id": "chatroom",
+          "title": "聊天室",
+          "icon": "chats",
+          "placement": [
+            "chat.panel",
+            "features"
+          ]
+        }
+      ],
+      "composer.actions": [
+        {
+          "id": "open-chatroom",
+          "label": {
+            "zh": "聊天室",
+            "en": "Chatroom"
+          },
+          "icon": "chats",
+          "effect": {
+            "type": "open",
+            "page": "panel:chatroom"
+          }
+        },
+        {
+          "id": "send-draft",
+          "label": {
+            "zh": "发到聊天室",
+            "en": "Send hub"
+          },
+          "icon": "send"
+        }
+      ]
+    }
+  }
+}
