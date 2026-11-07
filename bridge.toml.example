@@ -1,0 +1,114 @@
+# ══════════════════════════════════════════════════════════════════
+# dsh-post 配置样例
+#
+#   复制成 bridge.toml，改设备表与路径，就这三件事：
+#     ① [general] 写清 root 与 me
+#     ② [device.*] 每台一段：workspace / inbox / outbox / aliases
+#     ③ [recipients] 把「大家、给谁」这类词映射到设备 key
+#
+#   ⚠️ 下面所有路径**都是示例**，照抄一定跑不通 —— 换成你自己机器上的。
+#   ⚠️ 设备 key 用 ASCII（`pc` / `tablet` / `phone`）：TOML 的裸键只能是
+#      ASCII 字母数字，写中文键必须加引号（`[device."平板"]`），能不加就不加。
+#      给人看的名字放 `name`。
+# ══════════════════════════════════════════════════════════════════
+
+[general]
+# 配置里所有相对路径的展开基准。用绝对路径最省事。
+root = "D:/示例/工作区"          # ← 示例，改掉
+
+# 本机是哪台设备（必须是下面某个 [device.*] 的 key）。
+# 不写也能认：先比主机名与 aliases，再比 workspace 目录存不存在。
+# 三台机器的 bridge.toml 可以完全一样 —— 靠这一项（或主机名）区分本机。
+me = "pc"                         # ← 按机器改，或删掉靠自动识别
+
+# ssh = 多机部署；local = 单机双目录试跑（自测用这档，不起 ssh）
+transport = "ssh"
+
+# ssh 连接超时（秒）
+ssh_timeout_seconds = 15
+
+# 每台自己的私有状态（游标、pid、锁），相对各设备 workspace 展开
+state_dir = ".dsh/state"
+
+
+# ── 设备表 ─────────────────────────────────────────────────────
+# aliases 是 ssh config 里的 Host 名。⛔ 不要写 user@host 的形式：
+#   本包一律 shell 调用系统 ssh，别名能让别名映射（HostName/Port/IdentityFile）
+#   留在 ~/.ssh/config 里，换机器不用改这包。
+# 可以写多个别名：按顺序试，第一个连上的算数（DHCP 换了 IP 也不至于失联）。
+
+[device.pc]
+name = "电脑"
+workspace = "D:/示例/工作区"       # ← 示例
+inbox = "收件箱"
+outbox = "发件箱"
+aliases = []                       # 本机不用别名；别台连你时才需要
+
+[device.tablet]
+name = "平板"
+workspace = "/srv/示例/工作区"      # ← 示例（远端路径必须是绝对路径）
+inbox = "收件箱"
+outbox = "发件箱"
+aliases = ["tablet", "tablet-lan"]
+
+[device.phone]
+name = "手机"
+workspace = "/srv/示例/工作区"      # ← 示例
+inbox = "收件箱"
+outbox = "发件箱"
+aliases = ["phone"]
+
+
+# ── 聊天室中心 ─────────────────────────────────────────────────
+# 所有设备追加同一个文件。放哪台都行，但要**只有一台**在写主副本。
+[hub]
+host = "pc"                        # 空 = 就是本机
+path = "聊天室/hub.jsonl"           # 相对 [hub].host 那台的 workspace
+beat_path = ""                     # 空 = 与 hub.jsonl 同目录的 .chat.beat
+beat_deadline_seconds = 130        # 心跳超过这么久没动 = 守护活着但没在干活
+warn_lines = 5000                  # 超过这么多行提醒归档
+keep_lines = 5000                  # 归档时保留多少条
+
+
+# ── 投递 ───────────────────────────────────────────────────────
+[post]
+exts = [".md"]                     # 发件箱里哪些后缀算「待投的件」
+stale_minutes = 30                 # 超过这么久还没投出去 = 积压（--alarm-exit 据此报警）
+verify = true                      # 投完取对端 md5 对一遍（关掉会快，但也就没证据了）
+
+
+# ── 收件 ───────────────────────────────────────────────────────
+[receive]
+layout = "subdir"                  # subdir = 收件箱/<设备 key>/；flat = 都放顶层
+backend = "local"                  # local 已实现；posix-remote 是要自己实现的接口
+processed_dir = ""                 # 空 = 归位后原件留在原地；写 `已处理` 才搬过去
+
+
+# ── 命名 ───────────────────────────────────────────────────────
+[naming]
+# 文件名性质前缀（`知会_给平板_主题_20261107.md` 里的第一段）
+act_kinds = ["信", "回话", "同步", "知会"]
+
+# 从这天起（YYYYMMDD）的文件名要按规矩校验；空 = 全部校验（推荐）
+# 老件不改名也不想被拦时写这一段，比「给整个校验开个后门」安全
+enforce_since = ""
+
+max_text_chars = 20000             # 聊天室单条正文上限
+
+
+# ── 收件方词表 ─────────────────────────────────────────────────
+# 文件名第二段写这些词。⚠️ 这一张表就是「三台全投」事故的修复点：
+#   写成 "*" 或列出明确设备 key，别让「平板和手机」这种话去猜。
+[recipients]
+"大家" = "*"
+"电脑" = ["pc"]
+"平板" = ["tablet"]
+"手机" = ["phone"]
+
+
+# ── 守护 ───────────────────────────────────────────────────────
+[loop]
+interval_seconds = 120             # 每轮间隔（秒）
+pid_file = ""                      # 空 = <state_dir>/dsh_bridge_loop.pid
+status_file = ""                   # 空 = <state_dir>/dsh_bridge_loop.json
+once_timeout_seconds = 90

@@ -1,0 +1,12 @@
+# 归一化：仓里存 LF；Windows 检出 CRLF，Linux/macOS 检出 LF
+* text=auto eol=lf
+
+# 脚本必须 LF（CRLF 的 .sh 在 Linux 上会 exec 失败）
+*.sh   text eol=lf
+*.py   text eol=lf
+*.md   text eol=lf
+*.toml text eol=lf
+*.example text eol=lf
+
+# PowerShell 用 CRLF
+*.ps1  text eol=crlf

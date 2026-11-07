@@ -1,0 +1,47 @@
+# 最小样例的配置模板 —— {{TMP_A}} / {{TMP_B}} 由 setup.py 替换成临时目录。
+# ⛔ 仓里不放真路径；也不要手改这两个文件，跑 setup.py 即可。
+
+[general]
+root = "{{TMP_A}}"
+me = "devb"
+transport = "local"
+state_dir = ".dsh/state"
+
+[device.deva]
+name = "甲机"
+workspace = "{{TMP_A}}"
+inbox = "收件箱"
+outbox = "发件箱"
+aliases = []
+
+[device.devb]
+name = "乙机"
+workspace = "{{TMP_B}}"
+inbox = "收件箱"
+outbox = "发件箱"
+aliases = []
+
+[hub]
+host = "deva"
+path = "聊天室/hub.jsonl"
+beat_deadline_seconds = 130
+
+[post]
+exts = [".md"]
+stale_minutes = 30
+verify = true
+
+[receive]
+layout = "subdir"
+backend = "local"
+
+[naming]
+act_kinds = ["信", "回话", "同步", "知会"]
+
+[recipients]
+"大家" = "*"
+"甲机" = ["deva"]
+"乙机" = ["devb"]
+
+[loop]
+interval_seconds = 120
