@@ -33,6 +33,10 @@ state_dir = ".dsh/state"
 
 # ── 设备表 ─────────────────────────────────────────────────────
 # aliases 是 ssh config 里的 Host 名。⛔ 不要写 user@host 的形式：
+# 🔴 示例一律 `sim-` 前缀（sim-tablet / sim-phone）。**⛔ 别拿你真机已有的别名来改这段** ——
+#    如果 `~/.ssh/config` 里真有同名 Host 且连得通，`post --once` 会**静默把信投到那台真机**，
+#    还会因为对端真有 md5sum 而报「投出 1 · verified OK」全绿。你以为在演练，其实在写别人的盘。
+
 #   本包一律 shell 调用系统 ssh，别名能让别名映射（HostName/Port/IdentityFile）
 #   留在 ~/.ssh/config 里，换机器不用改这包。
 # 可以写多个别名：按顺序试，第一个连上的算数（DHCP 换了 IP 也不至于失联）。
@@ -49,14 +53,14 @@ name = "平板"
 workspace = "/srv/示例/工作区"      # ← 示例（远端路径必须是绝对路径）
 inbox = "收件箱"
 outbox = "发件箱"
-aliases = ["tablet", "tablet-lan"]
+aliases = ["sim-tablet", "sim-tablet-lan"]
 
 [device.phone]
 name = "手机"
 workspace = "/srv/示例/工作区"      # ← 示例
 inbox = "收件箱"
 outbox = "发件箱"
-aliases = ["phone"]
+aliases = ["sim-phone"]
 
 
 # ── 聊天室中心 ─────────────────────────────────────────────────

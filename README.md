@@ -276,7 +276,7 @@ name = "另一台"
 workspace = "/srv/work/dsh/工作区"   # ← 必须是【对方】机器上的绝对路径
 inbox = "收件箱"
 outbox = "发件箱"
-aliases = ["dev"]                    # ← 对方的 ssh 别名（写在 ~/.ssh/config 里）
+aliases = ["sim-dev"]                # ← 对方的 ssh 别名；示例一律 sim- 前缀，见下
 
 [hub]
 host = "pc"                   # 聊天室主副本放哪台（相对那台的 workspace）
@@ -287,6 +287,11 @@ path = "聊天室/hub.jsonl"
 "电脑" = ["pc"]
 "另一台" = ["dev"]
 ```
+
+🔴 **别用你真机已有的 ssh 别名来改这一段。** 如果 `~/.ssh/config` 里真有同名 Host 且连得通，
+`post --once` 会**静默把信投到那台真机**，并且因为对端真有 `md5sum`，验证还会报
+「投出 1 · verified OK」——**看起来全绿，其实在往别人的盘里写文件**。
+演练/试跑请用 `sim-` 前缀的假别名（`sim-dev`），或者干脆用本文上面那套 `transport = "local"` 的单机双目录。
 
 **四条最容易搞反的：**
 
