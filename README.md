@@ -3,6 +3,10 @@
 三台（或多台）机器之间**同步聊天** + **传递信件**。零第三方依赖，只用标准库和系统 `ssh`。
 
 - Python **≥ 3.11**（用了 `tomllib`）
+  ⚠️ 本文所有命令写的是 `python`。**很多 Linux 发行版默认只有 `python3`，没有 `python`** ——
+  那种机器第一条命令就会 `command not found`。两条路任选：把命令里的 `python` 换成 `python3`，
+  或者 `alias python=python3`（写进 `~/.bashrc` 才长期有效）。**先跑 `python -V` 确认一下**，
+  报错就用 `python3 -V`。
 - 系统 `ssh` 客户端（只在多机模式需要）
 - 无 pip 安装、无打包、无服务端
 
@@ -248,6 +252,58 @@ Remove-Item -Recurse -Force $w
 每台机器上的 `bridge.toml` 只差 `[general].me` 一个值。
 ⚠️ `ssh` 模式下**别台**的 `workspace` 必须是那台机器上的绝对路径（`/srv/work` 这种），
 写相对路径会直接报错。
+
+#### 多机（ssh）的完整样例 —— 直接抄，只改三处
+
+两台：`pc`（Windows，本机）和 `dev`（Linux）。两份 `bridge.toml` 内容相同，
+**不同的只有 `[general].me` 一行**（不写也行，本包会自己认）。
+
+```toml
+[general]
+me = "pc"                     # ← 另一台改成 "dev"，或者整行删掉让它自动识别
+transport = "ssh"
+root = "D:/work/dsh"          # ← 本机路径
+
+[device.pc]
+name = "电脑"
+workspace = "D:/work/dsh/工作区"
+inbox = "收件箱"
+outbox = "发件箱"
+aliases = []                  # 本机留空
+
+[device.dev]
+name = "另一台"
+workspace = "/srv/work/dsh/工作区"   # ← 必须是【对方】机器上的绝对路径
+inbox = "收件箱"
+outbox = "发件箱"
+aliases = ["dev"]                    # ← 对方的 ssh 别名（写在 ~/.ssh/config 里）
+
+[hub]
+host = "pc"                   # 聊天室主副本放哪台（相对那台的 workspace）
+path = "聊天室/hub.jsonl"
+
+[recipients]
+"大家" = "*"
+"电脑" = ["pc"]
+"另一台" = ["dev"]
+```
+
+**四条最容易搞反的：**
+
+| 项 | 正确 | 常见错法 |
+|---|---|---|
+| 段名 | `[device.pc]`（**单数**） | 写成 `[devices.pc]` ⇒ `至少要配一个 [device.<key>]` |
+| `aliases` | 本机 `[]`；`[device.对方]` 里写**对方的**别名 | 把本机别名也填上（会连到自己） |
+| `workspace` | `[device.dev]` 下写**对方机器上**的路径 | 写了本机路径 ⇒ 远端 `No such file or directory` |
+| `[recipients]` | 中文词 → 设备 **key**（`["dev"]`） | 写别名/主机名 |
+
+配完先验：
+
+```sh
+python -m bridge.chat --where        # 三份路径对不对（--where 是 chat 的选项）
+ssh dev 'echo ok'                    # 别名通不通
+python -m bridge.post --once --dry-run   # 真的会投给谁
+```
 
 ---
 
