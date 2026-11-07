@@ -19,6 +19,13 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 PKG = HERE.parent.parent
 
+# 与包里四个 CLI 入口一致：Windows 控制台代码页常是 936，
+# 不切 UTF-8 的话下面这些中文 PASS/FAIL 会变成乱码或直接抛 UnicodeEncodeError。
+sys.path.insert(0, str(PKG))
+from bridge.config import enable_utf8_stdio  # noqa: E402
+
+enable_utf8_stdio()
+
 
 def render(path: Path, subs: dict) -> str:
     t = Path(path).read_text(encoding="utf-8")

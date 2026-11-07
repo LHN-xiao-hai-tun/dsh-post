@@ -18,6 +18,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+# 测试在 Windows 控制台（代码页 936）里跑时，前半段 print 会抛 UnicodeEncodeError
+# 或输出乱码 —— 与四个 CLI 入口保持一致，进程一起来就把 stdio 切到 UTF-8。
+from bridge.config import enable_utf8_stdio  # noqa: E402
+
+enable_utf8_stdio()
+
 from bridge import post as post_mod  # noqa: E402
 from bridge import receive as receive_mod  # noqa: E402
 from bridge.config import load_config  # noqa: E402
