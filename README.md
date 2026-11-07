@@ -35,11 +35,29 @@
 先证明"它能用"再联真机 —— 这一步不需要第二台机器：拿两个目录当「两台设备」，
 `transport = "local"`，全程不碰 ssh、不碰任何别的机器。
 
+### 第 0 步：先确认 `python` 这个命令在你机器上叫什么
+
+```sh
+python -V      # 有输出（Python 3.11+）就继续，本文所有命令照抄
+python3 -V     # ← 上一条报 command not found 就试这个
+```
+
+**只有 `python3` 的话**，两条路任选一条，然后**本文里所有 `python` 都按 `python3` 敲**：
+
+```sh
+alias python=python3                      # 当前窗口有效
+echo 'alias python=python3' >> ~/.bashrc  # 长期有效
+```
+
+> 为什么本文不直接写 `python3`：**Windows 上通常只有 `python`，Linux 上通常只有 `python3`**，
+> 没有一个字对两边都成立。所以命令写 `python`（多数读者那边存在的那一个），
+> 并在最前面给你这一条能自己判断的命令 —— **别跳到第 1 步再撞错**。
+
 **三个前提，少一条就会卡住：**
 
 | 前提 | 说明 |
 |---|---|
-| Python ≥ 3.11 | `python --version` |
+| Python ≥ 3.11 | 第 0 步已经确认过命令名 |
 | **命令要在包目录里跑** | 下面所有 `python -m bridge.*` 的 cwd 必须是 `dsh-post/`（有 `bridge/` 那个目录）。在别处跑会 `ModuleNotFoundError: No module named 'bridge'` —— 「不需要装成包」不等于「哪跑都行」，见「命令」节开头 |
 | 两个可写目录 | 下面的演练用 `%TEMP%\dsh-post-demo`，跑完删掉 |
 
